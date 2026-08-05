@@ -1,119 +1,94 @@
-# setup.ps1 - Provisionamiento Zero-Friction RR ALIADOS
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 Clear-Host
 
-function Refresh-Path {
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-}
-
-# 0. Cargar Arte ASCII
-$asciiPath = Join-Path $PSScriptRoot "art.txt"
-if (Test-Path $asciiPath) {
-    $ascii = Get-Content -Path $asciiPath -Encoding UTF8 -Raw
+if (Test-Path "art.txt") {
+    $ascii = Get-Content -Path "art.txt" -Encoding UTF8 -Raw
     Write-Host $ascii -ForegroundColor DarkMagenta
 }
 
 Write-Host "===================================================" -ForegroundColor Gray
-Write-Host "   RR ALIADOS // AUTOMATED ENVIRONMENT SETUP" -ForegroundColor Magenta
+Write-Host "    RR ALIADOS // ENVIRONMENT DIAGNOSTIC & SETUP" -ForegroundColor Magenta
 Write-Host "===================================================`n" -ForegroundColor Gray
 
-# ---------------------------------------------------------
-# 1. VERIFICAR E INSTALAR NODE.JS
-# ---------------------------------------------------------
+$faltanDependencias = $false
+
 Write-Host "[1/5] Verificando Node.js..." -ForegroundColor Cyan
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "  > Node.js no detectado. Ejecutando Winget..." -ForegroundColor Yellow
-    winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements --silent
-    Refresh-Path
-} 
-Write-Host "  [OK] Node.js operativo." -ForegroundColor Green
+    Write-Host "  ⚠ Node.js no detectado." -ForegroundColor Yellow
+    Write-Host "    -> Descarga: https://nodejs.org/" -ForegroundColor Yellow
+    Write-Host "    -> IMPORTANTE: Marca 'Add to PATH' durante la instalación." -ForegroundColor DarkGray
+    $faltanDependencias = $true
+} else {
+    Write-Host "  ✔ Node.js detectado." -ForegroundColor Green
+}
 
-# ---------------------------------------------------------
-# 2. VERIFICAR E INSTALAR UV (PYTHON)
-# ---------------------------------------------------------
 Write-Host "`n[2/5] Verificando gestor Python (UV)..." -ForegroundColor Cyan
 if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
-    Write-Host "  > UV no detectado. Ejecutando Winget..." -ForegroundColor Yellow
-    winget install astral-sh.uv --accept-source-agreements --accept-package-agreements --silent
-    Refresh-Path
+    Write-Host "  ⚠ UV no detectado." -ForegroundColor Yellow
+    Write-Host "    -> Ejecuta este comando en una terminal nueva para instalarlo:" -ForegroundColor Yellow
+    Write-Host "        powershell -ExecutionPolicy ByPass -c 'irm https://astral.sh/uv/install.ps1 | iex'" -ForegroundColor DarkCyan
+    $faltanDependencias = $true
+} else {
+    Write-Host "  ✔ UV detectado." -ForegroundColor Green
 }
-Write-Host "  > Sincronizando entorno virtual..." -ForegroundColor Gray
-# Forzamos invocación desde cmd para evitar desincronización de PATH
-cmd.exe /c "uv sync"
 
-# ---------------------------------------------------------
-# 3. VERIFICAR E INSTALAR MOSQUITTO BROKER
-# ---------------------------------------------------------
 Write-Host "`n[3/5] Verificando Mosquitto Broker..." -ForegroundColor Cyan
 $mosquittoPath = 'C:\Program Files\mosquitto\mosquitto.conf'
 
 if (-not (Test-Path $mosquittoPath)) {
-    Write-Host "  > Mosquitto no encontrado. Ejecutando Winget..." -ForegroundColor Yellow
-    winget install EclipseFoundation.Mosquitto --accept-source-agreements --accept-package-agreements --silent
-}
-
-if (Test-Path $mosquittoPath) {
+    Write-Host "  ⚠ Mosquitto Broker no encontrado." -ForegroundColor Yellow
+    Write-Host "    -> Descarga (Windows 64-bit): https://mosquitto.org/download/" -ForegroundColor Yellow
+    Write-Host "    -> IMPORTANTE: Instala como Administrador." -ForegroundColor DarkGray
+    $faltanDependencias = $true
+} else {
     $confContent = Get-Content $mosquittoPath -Raw
     if ($confContent -notmatch "listener 9001") {
-        Write-Host "  > Configurando WebSockets (9001) y reiniciando servicio..." -ForegroundColor Yellow
-        $scriptWs = Join-Path $PSScriptRoot "add_mosquitto_ws.ps1"
-        
-        # El script auxiliar ahora DEBE incluir el reinicio del servicio: Restart-Service -Name mosquitto
-        $proc = Start-Process powershell -Verb RunAs -ArgumentList "-ExecutionPolicy Bypass -Command `"& '$scriptWs'; Restart-Service -Name mosquitto -ErrorAction SilentlyContinue`"" -Wait -PassThru
-        
-        if ($proc.ExitCode -ne 0) {
-            Write-Host "  [FAIL] Inyección de configuración Mosquitto fallida." -ForegroundColor Red
-        } else {
-            Write-Host "  [OK] Mosquitto configurado y reiniciado." -ForegroundColor Green
-        }
-    } else {
-        Write-Host "  [OK] Mosquitto ya configurado." -ForegroundColor Green
+        Write-Host "  Configurando WebSockets en puerto 9001..." -ForegroundColor Yellow
+        Start-Process powershell -Verb RunAs -ArgumentList "-ExecutionPolicy Bypass -File .\add_mosquitto_ws.ps1" -Wait
     }
+    Write-Host "  ✔ Mosquitto configurado correctamente." -ForegroundColor Green
 }
 
-# ---------------------------------------------------------
-# 4. VERIFICAR E INSTALAR OLLAMA Y DESCARGAR MODELO PHI4-MINI
-# ---------------------------------------------------------
 Write-Host "`n[4/5] Verificando Ollama e IA Local..." -ForegroundColor Cyan
 if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
-    Write-Host "  > Ollama no encontrado. Ejecutando Winget..." -ForegroundColor Yellow
-    winget install Ollama.Ollama --accept-source-agreements --accept-package-agreements --silent
-    Refresh-Path
-}
-
-if (Get-Command ollama -ErrorAction SilentlyContinue) {
-    Write-Host "  > Verificando estado del Daemon de Ollama..." -ForegroundColor Gray
-    
-    # Intento de arranque silencioso del servidor por si es una instalación limpia
-    Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 3 # Tiempo de buffer para que el puerto 11434 abra
-
+    Write-Host "  ⚠ Ollama no encontrado." -ForegroundColor Yellow
+    Write-Host "    -> Descarga: https://ollama.com/download/windows" -ForegroundColor Yellow
+    $faltanDependencias = $true
+} else {
+    Write-Host "  ✔ Ollama detectado." -ForegroundColor Green
+    Write-Host "  Verificando modelo phi4-mini..." -ForegroundColor Gray
     $models = ollama list 2>$null | Out-String
     if ($models -notmatch "phi4-mini") {
-        Write-Host "  > Descargando tensor local phi4-mini..." -ForegroundColor Yellow
+        Write-Host "  📥 Descargando modelo local phi4-mini (esto puede tomar un momento)..." -ForegroundColor Yellow
         ollama pull phi4-mini
     }
-    Write-Host "  [OK] Modelo phi4-mini instanciado." -ForegroundColor Green
-} else {
-    Write-Host "  [FAIL] Binario Ollama ilocalizable en sesión." -ForegroundColor Red
+    Write-Host "  ✔ Modelo phi4-mini listo." -ForegroundColor Green
 }
 
-# ---------------------------------------------------------
-# 5. INSTALAR DEPENDENCIAS FRONTEND
-# ---------------------------------------------------------
-Write-Host "`n[5/5] Construyendo árbol de dependencias Frontend..." -ForegroundColor Cyan
+if ($faltanDependencias) {
+    Write-Host "`n===================================================" -ForegroundColor Gray
+    Write-Host " ❌ FALTAN DEPENDENCIAS BASE. Instala lo requerido," -ForegroundColor Red
+    Write-Host " cierra esta terminal, ábrela de nuevo y reejecuta." -ForegroundColor Yellow
+    Write-Host "===================================================`n" -ForegroundColor Gray
+    exit
+}
+
+Write-Host "`n  Sincronizando entorno virtual de Python con UV..." -ForegroundColor Gray
+uv sync
+
+Write-Host "`n[5/5] Instalando dependencias del Frontend (React/Vite)..." -ForegroundColor Cyan
 $frontendDir = Join-Path $PSScriptRoot "src\frontend\web"
 
 if (Test-Path $frontendDir) {
     Push-Location $frontendDir
-    cmd.exe /c "npm install --no-fund --no-audit"
+    npm install --silent
     Pop-Location
-    Write-Host "  [OK] Frontend empaquetado." -ForegroundColor Green
 } else {
-    Write-Host "  [FAIL] Directorio $frontendDir inexistente." -ForegroundColor Red
+    Write-Host "  ❌ La ruta $frontendDir no existe." -ForegroundColor Red
 }
 
 Write-Host "`n===================================================" -ForegroundColor Gray
-Write-Host "[ SYSTEM READY ] ENTORNO RR ALIADOS DEPLOYADO." -ForegroundColor Magenta
-Write-Host "Lanza 'uv run honcho start' o ejecuta start_app.bat`n" -ForegroundColor Gray
+Write-Host "[✅ SUCCESS] TODO EL ENTORNO FUE CONFIGURADO." -ForegroundColor Green
+Write-Host "Ejecuta 'uv run honcho start' o abre start_app.bat para despegar.`n" -ForegroundColor Yellow
