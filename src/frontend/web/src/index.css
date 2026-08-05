@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+:root {
+  --rr-fucsia: #be076d;
+  --rr-mostaza-acido: #ded116;
+  --rr-orquidea: #973d8f;
+  --rr-blanco: #fffff3;
+  --rr-negro: #070001;
+  
+  --rr-font-heading: 'Neue Haas Groteske', 'Helvetica Neue', Helvetica, sans-serif;
+  --rr-font-body: 'Graphie', 'Inter', sans-serif;
+  --rr-tracking-tight: -0.05em;
+
+  background-color: var(--rr-negro);
+  color: var(--rr-blanco);
+  font-family: var(--rr-font-body);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--rr-font-heading);
+  margin: 0 0 1rem 0;
+}
+
+h1 {
+  font-size: 72pt;
+  font-weight: 700;
+  letter-spacing: var(--rr-tracking-tight);
+  text-transform: uppercase;
+}
+
+h2 {
+  font-size: 48pt;
+  font-weight: 500;
+}
+
+h3 {
+  font-size: 36pt;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Utilities */
+.bucm-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background-color: var(--rr-negro); /* Sober, removed background grid */
+}
+
+.bucm-btn {
+  background: var(--rr-fucsia);
+  color: var(--rr-blanco);
+  font-family: var(--rr-font-heading);
+  font-size: 24pt;
+  font-weight: bold;
+  border: 1px solid var(--rr-fucsia);
+  padding: 1rem 2rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  box-shadow: 4px 4px 0 var(--rr-fucsia); /* More sober shadow */
+}
+
+.bucm-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--rr-fucsia);
+}
+
+.bucm-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0 var(--rr-fucsia);
+}
+
+.bucm-btn.secondary {
+  background: transparent;
+  color: var(--rr-blanco);
+  border: 1px solid rgba(255, 255, 243, 0.3);
+  box-shadow: none;
+}
+.bucm-btn.secondary:hover {
+  background: rgba(255, 255, 243, 0.1);
+  color: var(--rr-blanco);
+}
+
+.bucm-card {
+  border: 1px solid rgba(255, 255, 243, 0.15); /* Sober border */
+  padding: 3rem;
+  background: var(--rr-negro);
+}
+
+.fucsia-text { color: var(--rr-fucsia); }
+.mostaza-text { color: var(--rr-mostaza-acido); }
+.orquidea-text { color: var(--rr-orquidea); }

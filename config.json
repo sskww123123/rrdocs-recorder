@@ -1,0 +1,13 @@
+{
+  "mqtt": {
+    "broker": "127.0.0.1",
+    "port": 1883,
+    "topic_commands": "rrdocs/reunion/comandos",
+    "topic_status": "rrdocs/reunion/estado"
+  },
+  "ui": {
+    "width": 800,
+    "height": 500,
+    "font_size": 16
+  }
+}

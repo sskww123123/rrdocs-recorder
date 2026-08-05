@@ -1,0 +1,1 @@
+Add-Content -Path 'C:\Program Files\mosquitto\mosquitto.conf' -Value "`n`n# === RR ALIADOS WEB CONFIG ===`nlistener 1883`nallow_anonymous true`n`nlistener 9001`nprotocol websockets`nallow_anonymous true"

@@ -1,0 +1,29 @@
+[project]
+name = "rrdocs-recorder"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "faster-whisper>=1.2.1",
+    "nvidia-cublas-cu12>=12.9.2.10",
+    "nvidia-cuda-runtime-cu12>=12.9.79",
+    "nvidia-cudnn-cu12>=9.24.0.43",
+    "ollama>=0.6.2",
+    "paho-mqtt>=2.1.0",
+    "py5>=0.10.10a7",
+    "pyaudio>=0.2.14",
+    "python-docx>=1.2.0",
+    "speechrecognition>=3.16.1",
+    "sqlalchemy>=2.0.50",
+    "textblob>=0.20.0",
+]
+
+[dependency-groups]
+dev = [
+    "honcho>=2.0.0",
+    "pyinstaller>=6.20.0",
+    "pytest>=9.0.3",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.15.17",
+]

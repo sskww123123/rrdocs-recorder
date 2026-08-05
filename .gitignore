@@ -1,0 +1,54 @@
+# ==========================================
+# 1. Entornos de Desarrollo & IDEs
+# ==========================================
+.venv/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# 2. Compilación de Python & Cache
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+
+# ==========================================
+# 3. Frontend Web (React + Vite + Node)
+# ==========================================
+node_modules/
+src/frontend/web/node_modules/
+src/frontend/web/dist/
+src/frontend/web/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==========================================
+# 4. Reportes, Base de Datos & Audios de Salida
+# ==========================================
+reports/
+*.docx
+*.db
+*.sqlite3
+*.wav
+*.mp3
+*.m4a
+*.log
+debug.log
+
+# ==========================================
+# 5. Archivos Temporales / Experimentos
+# ==========================================
+*.tmp
+# ==========================================
+# Backups y Archivos Obsoletos
+# ==========================================
+BACKUP_VERSION_ESTABLE/
+backups/
+*.backup
+*_backup.*
